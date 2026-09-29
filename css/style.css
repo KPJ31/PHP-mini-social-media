@@ -1,0 +1,136 @@
+/* ===============================
+   General Layout
+================================== */
+body {
+  background-color: #f5f6fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-top: 20px;
+}
+
+/* ===============================
+   Card Styling
+================================== */
+.card {
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.card-body {
+  background-color: #fff;
+}
+
+/* ===============================
+   Profile Pictures
+================================== */
+img.rounded-circle {
+  object-fit: cover;
+}
+
+/* ===============================
+   Post Image Styling
+================================== */
+.card-body img.img-fluid {
+  border-radius: 8px;
+  max-height: 300px;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+/* ===============================
+   Buttons Styling
+================================== */
+button.btn-primary,
+button.btn-outline-primary,
+button.btn-outline-secondary {
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+/* Like/Comment Button Specifics */
+.like-count {
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.liked {
+  background-color: #0d6efd !important;
+  color: white !important;
+}
+
+/* ===============================
+   Comment Section
+================================== */
+.comment-section {
+  background-color: #f1f1f1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 10px;
+}
+
+.comment-section p {
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+/* ===============================
+   Form Inputs
+================================== */
+textarea.form-control {
+  resize: none;
+  border-radius: 8px;
+}
+
+input.form-control,
+input[type="file"] {
+  border-radius: 8px;
+}
+
+/* ===============================
+   Chat Styling
+================================== */
+#chat-box {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+/* ===============================
+   Responsive Adjustments
+================================== */
+@media (max-width: 576px) {
+  .card-header,
+  .card-body {
+    padding: 12px;
+  }
+
+  .container {
+    padding: 0 10px;
+  }
+
+
+  .card-body img.img-fluid {
+    max-height: 200px;
+  }
+
+  button.btn {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+}
