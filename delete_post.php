@@ -1,6 +1,7 @@
 <?php
 require_once 'config.php';
 require_once 'session.php';
+require_once 'function.php';
 requirePost();
 
 if (!isset($_POST['post_id']) || !is_numeric($_POST['post_id'])) {
@@ -56,13 +57,7 @@ try {
     error_log($e->getMessage());
     failRequest(500, 'Unable to delete the post.');
 }
-// The stored path must name a file inside uploads.
-if (!empty($post['image']) && basename($post['image']) === $post['image']) {
-    $imagePath = __DIR__ . '/uploads/' . $post['image'];
-    if (is_file($imagePath) && !@unlink($imagePath)) {
-        error_log('Unable to remove deleted post image.');
-    }
-}
+removeUnusedUpload($post['image']);
 header("Location: profile.php");
 exit;
 

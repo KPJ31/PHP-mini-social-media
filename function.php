@@ -91,14 +91,62 @@ function uploadProfileImage($file) {
     }
     $types = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
     $type = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
-    if (!isset($types[$type]) || @getimagesize($file['tmp_name']) === false) {
+    $dimensions = @getimagesize($file['tmp_name']);
+    if (!isset($types[$type]) || !$dimensions || $dimensions[0] * $dimensions[1] > 40000000) {
         return null;
     }
     $name = bin2hex(random_bytes(16)) . '.' . $types[$type];
-    return move_uploaded_file($file['tmp_name'], __DIR__ . '/uploads/' . $name) ? $name : null;
+    return @move_uploaded_file($file['tmp_name'], __DIR__ . '/uploads/' . $name) ? $name : null;
 }
 function requireFriend(int $userId, int $friendId): void {
     if (!$friendId || !areFriends($userId, $friendId)) {
         failRequest(403, 'Choose an accepted friend to chat with.');
     }
+}
+
+function pageNumber(string $key = 'page'): int {
+    return min(100000, max(1, inputId($_GET, $key)));
+}
+function paginationLinks(bool $more, string $key = 'page'): string {
+    $page = pageNumber($key);
+    if ($page === 1 && !$more) { return ''; }
+    $params = array_filter($_GET, static fn ($value) => is_string($value));
+    $html = '<nav class="pagination-links" aria-label="Pagination">';
+    foreach (['Previous' => $page - 1, 'Next' => $page + 1] as $label => $target) {
+        if (($label === 'Previous' && $page === 1) || ($label === 'Next' && !$more)) { continue; }
+        $params[$key] = $target;
+        $html .= '<a class="btn btn-outline-primary" href="?' . htmlspecialchars(http_build_query($params)) . '">' . $label . '</a>';
+    }
+    return $html . '</nav>';
+}
+function removeUnusedUpload(?string $name): void {
+    global $conn;
+    if (!$name || basename($name) !== $name || in_array($name, ['default.png', 'default.svg'], true)) { return; }
+    $check = $conn->prepare('SELECT 1 FROM users WHERE profile_image = ? UNION ALL SELECT 1 FROM posts WHERE image = ? LIMIT 1');
+    $check->bind_param('ss', $name, $name);
+    $check->execute();
+    if ($check->get_result()->num_rows) { return; }
+    $path = __DIR__ . '/uploads/' . $name;
+    if (is_file($path) && !@unlink($path)) { error_log('Unable to remove unreferenced upload.'); }
+}
+function conversationMessages(int $viewer, int $friend, int $before = 0): array {
+    global $conn;
+    $upper = $before ?: PHP_INT_MAX;
+    $stmt = $conn->prepare('SELECT m.*, u.username FROM messages m JOIN users u ON u.id = m.sender_id
+        WHERE ((m.sender_id = ? AND m.receiver_id = ? AND m.deleted_by_sender = 0)
+            OR (m.sender_id = ? AND m.receiver_id = ? AND m.deleted_by_receiver = 0))
+        AND m.id < ? ORDER BY m.id DESC LIMIT 101');
+    $stmt->bind_param('iiiii', $viewer, $friend, $friend, $viewer, $upper);
+    $stmt->execute();
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $more = count($rows) > 100;
+    $rows = array_reverse(array_slice($rows, 0, 100));
+    if ($rows) {
+        $min = $rows[0]['id'];
+        $max = $rows[count($rows) - 1]['id'];
+        $read = $conn->prepare('UPDATE messages SET is_read = 1 WHERE receiver_id = ? AND sender_id = ? AND id BETWEEN ? AND ? AND deleted_by_receiver = 0 AND is_read = 0');
+        $read->bind_param('iiii', $viewer, $friend, $min, $max);
+        $read->execute();
+    }
+    return ['rows' => $rows, 'more' => $more];
 }

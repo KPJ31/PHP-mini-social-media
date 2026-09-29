@@ -36,15 +36,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
 
 $post_owner_id = $post['user_id'] ?? 0;
 
+$offset = (pageNumber() - 1) * 50;
+$shown = 0;
 // Get comments
 $comments_stmt = $conn->prepare("
     SELECT comments.*, users.username, users.profile_image 
     FROM comments 
     JOIN users ON comments.user_id = users.id 
     WHERE post_id = ? 
-    ORDER BY comments.created_at ASC
+    ORDER BY comments.id ASC LIMIT 51 OFFSET ?
 ");
-$comments_stmt->bind_param("i", $post_id);
+$comments_stmt->bind_param("ii", $post_id, $offset);
 $comments_stmt->execute();
 $comments = $comments_stmt->get_result();
 $comments_stmt->close();
@@ -70,7 +72,7 @@ $comments_stmt->close();
       <!-- Post Display -->
       <div class="card mb-4 shadow-sm">
         <div class="card-header d-flex align-items-center">
-          <img loading="lazy" src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Profile image">
+          <img loading="lazy" src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
           <strong><?= htmlspecialchars($post['username']); ?></strong>
           <span class="ms-auto small text-muted"><?= date('F j, Y h:i A', strtotime($post['created_at'])); ?></span>
         </div>
@@ -94,11 +96,11 @@ $comments_stmt->close();
 
       <!-- Comment List -->
       <div class="card form-panel">
-        <h5 class="mb-3">Comments</h5>
+        <h2 class="mb-3">Comments</h2>
         <?php if ($comments->num_rows > 0): ?>
-          <?php while ($comment = $comments->fetch_assoc()): ?>
+          <?php while (($comment = $comments->fetch_assoc()) && $shown++ < 50): ?>
             <div class="d-flex mb-3">
-              <img loading="lazy" src="uploads/<?= htmlspecialchars(($comment['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $comment['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Profile image">
+              <img loading="lazy" src="uploads/<?= htmlspecialchars(($comment['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $comment['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
               <div class="flex-grow-1">
                 <strong><?= htmlspecialchars($comment['username']); ?></strong><br>
                 <span><?= nl2br(htmlspecialchars($comment['comment'])); ?></span><br>
@@ -106,11 +108,12 @@ $comments_stmt->close();
               </div>
               <?php if ($comment['user_id'] == $user_id || $post_owner_id == $user_id): ?>
                 <div class="ms-2">
-                  <form action="delete_comment.php" method="post" class="d-inline" onsubmit="return confirm('Delete this comment?')"><?= csrfField() ?><input type="hidden" name="id" value="<?= $comment['id'] ?>"><input type="hidden" name="post_id" value="<?= $post_id ?>"><button type="submit" class="btn btn-sm btn-outline-danger">Delete</button></form>
+                  <form action="delete_comment.php" method="post" class="d-inline" data-confirm="Delete this comment?"><?= csrfField() ?><input type="hidden" name="id" value="<?= $comment['id'] ?>"><input type="hidden" name="post_id" value="<?= $post_id ?>"><button type="submit" class="btn btn-sm btn-outline-danger">Delete</button></form>
                 </div>
               <?php endif; ?>
             </div>
           <?php endwhile; ?>
+          <?= paginationLinks($comments->num_rows > 50) ?>
         <?php else: ?>
           <p class="text-muted">No comments yet.</p>
         <?php endif; ?>

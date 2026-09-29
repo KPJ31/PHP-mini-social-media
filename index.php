@@ -3,14 +3,17 @@ require_once 'config.php';
 require_once 'session.php';
 require_once 'function.php';
 
-// Fetch all posts with user info
+$offset = (pageNumber() - 1) * 20;
+$shown = 0;
+// Fetch a bounded page of posts
 $stmt = $conn->prepare("
     SELECT posts.*, users.username, users.profile_image,
         (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes
     FROM posts
     JOIN users ON posts.user_id = users.id
-    ORDER BY posts.created_at DESC
+    ORDER BY posts.id DESC LIMIT 21 OFFSET ?
 ");
+$stmt->bind_param('i', $offset);
 $stmt->execute();
 $posts = $stmt->get_result();
 ?>
@@ -35,10 +38,10 @@ $posts = $stmt->get_result();
       <div class="welcome-panel"><span class="eyebrow">A place to belong</span><h2>Your people. Your stories.<br>Your everyday moments.</h2><p>Share something small. Start a conversation. Stay connected.</p></div>
       <div class="section-title"><h2>Recent posts</h2><span>From your community</span></div>
       <?php if ($posts->num_rows > 0): ?>
-        <?php while ($row = $posts->fetch_assoc()): ?>
+        <?php while (($row = $posts->fetch_assoc()) && $shown++ < 20): ?>
           <div class="card mb-4 shadow-sm">
             <div class="card-header d-flex align-items-center">
-              <img loading="lazy" src="uploads/<?= htmlspecialchars(($row['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $row['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Image shared with this post">
+              <img loading="lazy" src="uploads/<?= htmlspecialchars(($row['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $row['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
               <strong><?= htmlspecialchars($row['username']) ?></strong>
               <span class="ms-auto text-muted small"><?= date('F j, Y h:i A', strtotime($row['created_at'])) ?></span>
             </div>
@@ -58,6 +61,7 @@ $posts = $stmt->get_result();
             </div>
           </div>
         <?php endwhile; ?>
+        <?= paginationLinks($posts->num_rows > 20) ?>
       <?php else: ?>
         <div class="empty-state"><i class="bx bx-edit" aria-hidden="true"></i><h2>The first story could be yours.</h2><p>No posts yet. Share a moment with your community.</p><a class="btn btn-outline-primary" href="add_post.php">Write your first post</a></div>
       <?php endif; ?>

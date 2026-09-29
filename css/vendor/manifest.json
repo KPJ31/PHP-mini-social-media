@@ -1,0 +1,92 @@
+[
+  {
+    "file": "css/vendor/bootstrap.min.css",
+    "source": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+    "sha256": "3c8f27e6009ccfd710a905e6dcf12d0ee3c6f2ac7da05b0572d3e0d12e736fc8",
+    "bytes": 232803
+  },
+  {
+    "file": "css/vendor/boxicons.min.css",
+    "source": "https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css",
+    "sha256": "775edd6d2214fe632344be2bf174462dc570c96bcf1e93500c70b2b8c4b59acc",
+    "bytes": 68010
+  },
+  {
+    "file": "css/vendor/fonts/boxicons.eot",
+    "source": "https://unpkg.com/boxicons@2.1.4/fonts/boxicons.eot",
+    "sha256": "c23887bb1c71c66599f84c6ada9408a619f8bbce2541b6c74129c2ae3a50e1f7",
+    "bytes": 405670
+  },
+  {
+    "file": "css/vendor/fonts/boxicons.woff2",
+    "source": "https://unpkg.com/boxicons@2.1.4/fonts/boxicons.woff2",
+    "sha256": "4b87cbc74f3ffaf08314a5d81b501be6fc36f553dbe446ef5a4b29f0138ba0b0",
+    "bytes": 115680
+  },
+  {
+    "file": "css/vendor/fonts/boxicons.woff",
+    "source": "https://unpkg.com/boxicons@2.1.4/fonts/boxicons.woff",
+    "sha256": "d5d511cf96072bc7d5db37f92c35b5306ad5cb5ba37f456abfb08ffa77f16286",
+    "bytes": 321020
+  },
+  {
+    "file": "css/vendor/fonts/boxicons.ttf",
+    "source": "https://unpkg.com/boxicons@2.1.4/fonts/boxicons.ttf",
+    "sha256": "47509a2dd79b019b0b914eed0ba4120748124889467a30a51f095c7adb41dc06",
+    "bytes": 320944
+  },
+  {
+    "file": "css/vendor/fonts/boxicons.svg",
+    "source": "https://unpkg.com/boxicons@2.1.4/fonts/boxicons.svg",
+    "sha256": "3fe502d8c8f6a0bb86fc258e16aa6ec95a684ee50d693bd4fe305b467fd270bb",
+    "bytes": 1242122
+  },
+  {
+    "file": "css/vendor/poppins.css",
+    "source": "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap",
+    "sha256": "c9750e02c629500f64ddd7b0f5908ebb41f4e648987b0f76ef0cd06250283246",
+    "bytes": 656
+  },
+  {
+    "file": "css/vendor/fonts/poppins-0.ttf",
+    "source": "https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrFJA.ttf",
+    "sha256": "cdedb1729acac414ed01744a11da7badb86adf13108e7bd3fa161b9323f7fe54",
+    "bytes": 154628
+  },
+  {
+    "file": "css/vendor/fonts/poppins-1.ttf",
+    "source": "https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLGT9V1s.ttf",
+    "sha256": "fcff04f4bec2b3636f05ed894dc1f9a752c4cb587ee49857ec7a82abaf6ca016",
+    "bytes": 152860
+  },
+  {
+    "file": "css/vendor/fonts/poppins-2.ttf",
+    "source": "https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6V1s.ttf",
+    "sha256": "dae40ca7b35fe7501bda2e4140a6860b1db47330be5d3c8ab6971fd83a70e9a5",
+    "bytes": 151516
+  },
+  {
+    "file": "css/vendor/fonts/poppins-3.ttf",
+    "source": "https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLCz7V1s.ttf",
+    "sha256": "1984efdda0fbe207d7ac20feac2ba7c2768c92a90094b02a206c9d58cc30ff2e",
+    "bytes": 150292
+  },
+  {
+    "file": "css/vendor/BOOTSTRAP-LICENSE.txt",
+    "source": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/LICENSE",
+    "sha256": "8c14611ae41ac6fd543c13349f22188eb12c69b3e59105c5eca3925a8e4eca3e",
+    "bytes": 1093
+  },
+  {
+    "file": "css/vendor/BOXICONS-LICENSE.txt",
+    "source": "https://unpkg.com/boxicons@2.1.4/LICENSE",
+    "sha256": "1676a8bdd036382b7bdb8a9ec26a55af6bf15035dd4d405169da2ee45b066e22",
+    "bytes": 1107
+  },
+  {
+    "file": "css/vendor/POPPINS-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/poppins/OFL.txt",
+    "sha256": "6be04893d770899a015649c7aa3b582f871b272f8747a92b78b17c3e5c8b2573",
+    "bytes": 4385
+  }
+]

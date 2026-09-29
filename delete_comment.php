@@ -9,7 +9,7 @@ $user_id = $_SESSION['user_id'];
 
 // Get comment with user_id and post_id
 $stmt = $conn->prepare("
-    SELECT comments.user_id, posts.user_id AS post_owner_id 
+    SELECT comments.user_id, comments.post_id, posts.user_id AS post_owner_id 
     FROM comments 
     JOIN posts ON comments.post_id = posts.id 
     WHERE comments.id = ?
@@ -17,6 +17,8 @@ $stmt = $conn->prepare("
 $stmt->bind_param("i", $comment_id);
 $stmt->execute();
 $result = $stmt->get_result()->fetch_assoc();
+if (!$result) { failRequest(404, 'Comment not found.'); }
+$post_id = (int) $result['post_id'];
 
 if ($result && ($result['user_id'] == $user_id || $result['post_owner_id'] == $user_id)) {
     $delete_stmt = $conn->prepare("DELETE FROM comments WHERE id = ?");

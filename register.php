@@ -19,6 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate fields
     if ($username === '' || $email === '' || $password === '' || $confirm_password === '') {
         $errors[] = "All fields are required.";
+    } elseif (strlen($password) < 8) {
+        $errors[] = 'Use a password with at least 8 characters.';
     } elseif (str_contains($password, "\0")) {
         $errors[] = 'Password contains an invalid character.';
     } elseif (strlen($username) > 50 || strlen($email) > 100 || strlen($password) > 72) {
@@ -91,9 +93,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <form action="" method="POST" data-loading-form><?= csrfField() ?>
 <div class="mb-3"><label for="username">Username</label><input id="username" type="text" name="username" class="form-control" autocomplete="username" required value="<?= htmlspecialchars(inputText($_POST, 'username')) ?>"></div>
 <div class="mb-3"><label for="email">Email address</label><input id="email" type="email" name="email" class="form-control" autocomplete="email" required value="<?= htmlspecialchars(inputText($_POST, 'email')) ?>"></div>
-<div class="mb-3"><label for="password">Password</label><div class="password-wrap"><input id="password" type="password" name="password" class="form-control" autocomplete="new-password" required><button type="button" class="icon-button" data-password-toggle="password" aria-label="Show password" aria-controls="password" aria-pressed="false"><i class="bx bx-show" aria-hidden="true"></i></button></div></div>
+<div class="mb-3"><label for="password">Password</label><div class="password-wrap"><input id="password" type="password" name="password" minlength="8" aria-describedby="password-help" class="form-control" autocomplete="new-password" required><button type="button" class="icon-button" data-password-toggle="password" aria-label="Show password" aria-controls="password" aria-pressed="false"><i class="bx bx-show" aria-hidden="true"></i></button></div></div>
 <div class="mb-3"><label for="confirm_password">Confirm password</label><div class="password-wrap"><input id="confirm_password" type="password" name="confirm_password" class="form-control" autocomplete="new-password" required><button type="button" class="icon-button" data-password-toggle="confirm_password" aria-label="Show password" aria-controls="confirm_password" aria-pressed="false"><i class="bx bx-show" aria-hidden="true"></i></button></div></div>
 
+<p id="password-help" class="form-text">Use at least 8 characters. Passwords may contain up to 72 bytes.</p>
 <button type="submit" class="btn btn-gold w-100">Create account<i class="bx bx-right-arrow-alt" aria-hidden="true"></i></button>
 </form>
 <p class="auth-switch">Already have an account? <a href="login.php">Log in</a></p>

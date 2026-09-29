@@ -14,15 +14,17 @@ $user = $stmt->get_result()->fetch_assoc();
 if (!$user) { failRequest(404, 'User not found.'); }
 $stmt->close();
 
-// Fetch user's posts
+$offset = (pageNumber() - 1) * 20;
+$shown = 0;
+// Fetch a bounded page of user posts
 $post_stmt = $conn->prepare("
     SELECT posts.*, users.username, users.profile_image 
     FROM posts 
     JOIN users ON posts.user_id = users.id 
     WHERE posts.user_id = ? 
-    ORDER BY posts.created_at DESC
+    ORDER BY posts.id DESC LIMIT 21 OFFSET ?
 ");
-$post_stmt->bind_param("i", $view_user_id);
+$post_stmt->bind_param("ii", $view_user_id, $offset);
 $post_stmt->execute();
 $posts = $post_stmt->get_result();
 $post_stmt->close();
@@ -45,7 +47,7 @@ $post_stmt->close();
   <div class="row">
     <div class="col-md-4 text-center">
       <div class="card profile-card">
-        <img loading="lazy" src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" class="rounded-circle mb-3" width="150" height="150" alt="Profile" alt="Image shared with this post">
+        <img loading="lazy" src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" class="rounded-circle mb-3" width="150" height="150" alt="Profile">
         <h2><?= htmlspecialchars($user['username']) ?></h2>
         <p class="text-muted"><?= htmlspecialchars($user['email']) ?></p>
         <?php if (!empty($user['bio'])): ?>
@@ -54,7 +56,7 @@ $post_stmt->close();
         <?php if ($view_user_id == $logged_in_user): ?>
           <a href="edit_profile.php" class="btn btn-outline-primary mb-2">Edit Profile</a>
           <a href="add_post.php" class="btn btn-gold mb-2">Create Post</a>
-          <form action="delete_account.php" method="post" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');"><?= csrfField() ?>
+          <form action="delete_account.php" method="post" data-confirm="Are you sure you want to delete your account? This action cannot be undone."><?= csrfField() ?>
             <button type="submit" name="delete_account" class="btn btn-outline-danger w-100">Delete Account</button>
           </form>
         <?php endif; ?>
@@ -64,10 +66,10 @@ $post_stmt->close();
     <div class="col-md-8">
       <h2 class="mb-3">Posts by <?= htmlspecialchars($user['username']) ?></h2>
       <?php if ($posts->num_rows > 0): ?>
-        <?php while ($post = $posts->fetch_assoc()): ?>
+        <?php while (($post = $posts->fetch_assoc()) && $shown++ < 20): ?>
           <div class="card mb-3 shadow-sm">
             <div class="card-header d-flex align-items-center">
-              <img loading="lazy" src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Image shared with this post">
+              <img loading="lazy" src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
               <strong><?= htmlspecialchars($post['username']) ?></strong>
               <span class="ms-auto text-muted small"><?= date('F j, Y h:i A', strtotime($post['created_at'])) ?></span>
             </div>
@@ -79,12 +81,13 @@ $post_stmt->close();
               <div class="mt-2 d-flex justify-content-between">
                 <a href="comment_post.php?post_id=<?= $post['id'] ?>" class="btn btn-sm btn-outline-secondary">Comment</a>
                 <?php if ($logged_in_user == $post['user_id']): ?>
-                  <form action="delete_post.php" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this post?')"><?= csrfField() ?><input type="hidden" name="post_id" value="<?= $post['id'] ?>"><button type="submit" class="btn btn-sm btn-outline-danger">Delete</button></form>
+                  <form action="delete_post.php" method="post" class="d-inline" data-confirm="Are you sure you want to delete this post?"><?= csrfField() ?><input type="hidden" name="post_id" value="<?= $post['id'] ?>"><button type="submit" class="btn btn-sm btn-outline-danger">Delete</button></form>
                 <?php endif; ?>
               </div>
             </div>
           </div>
         <?php endwhile; ?>
+        <?= paginationLinks($posts->num_rows > 20) ?>
       <?php else: ?>
         <p class="text-muted">No posts available.</p>
       <?php endif; ?>

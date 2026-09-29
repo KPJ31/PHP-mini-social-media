@@ -19,6 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
     $email = trim(inputText($_POST, 'email'));
     $bio = inputText($_POST, 'bio');
     $new_image = $user['profile_image'];
+    $old_image = $new_image;
     if ($username === '' || strlen($username) > 50 || strlen($email) > 100
         || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($bio) > 65535) {
         $error = 'Enter a valid username and email, and keep your bio within 65535 bytes.';
@@ -42,10 +43,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
             $update = $conn->prepare('UPDATE users SET username = ?, email = ?, bio = ?, profile_image = ? WHERE id = ?');
             $update->bind_param('ssssi', $username, $email, $bio, $new_image, $user_id);
             $update->execute();
+            if ($new_image !== $old_image) { removeUnusedUpload($old_image); }
             $_SESSION['username'] = $username;
             $success = 'Profile updated successfully.';
             $user = array_merge($user, compact('username', 'email', 'bio'), ['profile_image' => $new_image]);
         } catch (mysqli_sql_exception $e) {
+            if ($new_image !== $old_image) { removeUnusedUpload($new_image); }
             if ($e->getCode() !== 1062) { throw $e; }
             $error = 'Email or username already taken.';
         }

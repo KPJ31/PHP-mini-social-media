@@ -1,6 +1,7 @@
 <?php
 require_once 'config.php';
 require_once 'function.php';
+require_once 'auth_throttle.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
@@ -10,6 +11,7 @@ if (isset($_SESSION['user_id'])) {
 
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    recordLoginAttempt();
     $email = trim(inputText($_POST, 'email'));
     $password = inputText($_POST, 'password');
 

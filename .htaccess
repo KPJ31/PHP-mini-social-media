@@ -1,0 +1,10 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule (^|/)(\.git|tests|migrations)(/|$) - [F,L,NC]
+RewriteRule (^|/)\. - [F,L]
+<FilesMatch "(?i)\.(sql|md|py|log|bak|ini|env|lock)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^(config|security|session|function|navbar|footer|ui_assets|message_list|auth_throttle)\.php$">
+    Require all denied
+</FilesMatch>

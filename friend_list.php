@@ -1,10 +1,15 @@
 <?php
 require_once 'config.php';
 require_once 'session.php';
+require_once 'function.php';
 
 $user_id = $_SESSION['user_id'];
 $search_query = isset($_GET['search']) ? trim(inputText($_GET, 'search')) : '';
 
+$friendOffset = (pageNumber('friends_page') - 1) * 50;
+$requestOffset = (pageNumber('requests_page') - 1) * 50;
+$searchOffset = (pageNumber('search_page') - 1) * 50;
+$friendShown = $requestShown = $searchShown = 0;
 // Fetch accepted friends
 $friends_stmt = $conn->prepare("
     SELECT DISTINCT u.id, u.username, u.profile_image
@@ -13,9 +18,9 @@ $friends_stmt = $conn->prepare("
         (fr.sender_id = ? AND fr.receiver_id = u.id) OR 
         (fr.receiver_id = ? AND fr.sender_id = u.id)
     )
-    WHERE fr.status = 'accepted'
+    WHERE fr.status = 'accepted' ORDER BY u.username, u.id LIMIT 51 OFFSET ?
 ");
-$friends_stmt->bind_param("ii", $user_id, $user_id);
+$friends_stmt->bind_param("iii", $user_id, $user_id, $friendOffset);
 $friends_stmt->execute();
 $friends = $friends_stmt->get_result();
 $friends_stmt->close();
@@ -24,8 +29,8 @@ $friends_stmt->close();
 $search_results = null;
 if ($search_query !== '') {
     $search_term = '%' . $search_query . '%';
-    $stmt = $conn->prepare("SELECT id, username, profile_image FROM users WHERE username LIKE ? AND id != ?");
-    $stmt->bind_param("si", $search_term, $user_id);
+    $stmt = $conn->prepare("SELECT id, username, profile_image FROM users WHERE username LIKE ? AND id != ? ORDER BY username, id LIMIT 51 OFFSET ?");
+    $stmt->bind_param("sii", $search_term, $user_id, $searchOffset);
     $stmt->execute();
     $search_results = $stmt->get_result();
     $stmt->close();
@@ -36,9 +41,9 @@ $pending_stmt = $conn->prepare("
     SELECT DISTINCT u.id, u.username, u.profile_image
     FROM users u
     JOIN friend_requests fr ON u.id = fr.sender_id
-    WHERE fr.receiver_id = ? AND fr.status = 'pending'
+    WHERE fr.receiver_id = ? AND fr.status = 'pending' ORDER BY u.id LIMIT 51 OFFSET ?
 ");
-$pending_stmt->bind_param("i", $user_id);
+$pending_stmt->bind_param("ii", $user_id, $requestOffset);
 $pending_stmt->execute();
 $pending_requests = $pending_stmt->get_result();
 $pending_stmt->close();
@@ -84,7 +89,7 @@ $pending_stmt->close();
             </tr>
           </thead>
           <tbody>
-            <?php while ($friend = $friends->fetch_assoc()): ?>
+            <?php while (($friend = $friends->fetch_assoc()) && $friendShown++ < 50): ?>
               <tr>
                 <td><img loading="lazy" src="uploads/<?= htmlspecialchars(($friend['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $friend['profile_image']) ?>" class="rounded-circle" width="40" height="40" alt="Profile image"></td>
                 <td><?= htmlspecialchars($friend['username']) ?></td>
@@ -95,7 +100,9 @@ $pending_stmt->close();
               </tr>
             <?php endwhile; ?>
           </tbody>
-        </table></div>
+        </table>
+</div>
+        <?= paginationLinks($friends->num_rows > 50, 'friends_page') ?>
       <?php else: ?>
         <div class="empty-state"><i class="bx bx-group" aria-hidden="true"></i><h2>Your circle starts here.</h2><p>Search for a username above to send your first friend request.</p></div>
       <?php endif; ?>
@@ -118,7 +125,7 @@ $pending_stmt->close();
             </tr>
           </thead>
           <tbody>
-            <?php while ($req = $pending_requests->fetch_assoc()): ?>
+            <?php while (($req = $pending_requests->fetch_assoc()) && $requestShown++ < 50): ?>
               <tr>
                 <td><img loading="lazy" src="uploads/<?= htmlspecialchars(($req['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $req['profile_image']) ?>" class="rounded-circle" width="40" height="40" alt="Profile image"></td>
                 <td><?= htmlspecialchars($req['username']) ?></td>
@@ -128,7 +135,9 @@ $pending_stmt->close();
               </tr>
             <?php endwhile; ?>
           </tbody>
-        </table></div>
+        </table>
+</div>
+        <?= paginationLinks($pending_requests->num_rows > 50, 'requests_page') ?>
       <?php else: ?>
         <div class="empty-state"><i class="bx bx-check-circle" aria-hidden="true"></i><p>You are all caught up. New friend requests will appear here.</p></div>
       <?php endif; ?>
@@ -152,7 +161,7 @@ $pending_stmt->close();
               </tr>
             </thead>
             <tbody>
-              <?php while ($user = $search_results->fetch_assoc()): ?>
+              <?php while (($user = $search_results->fetch_assoc()) && $searchShown++ < 50): ?>
                 <tr>
                   <td><img loading="lazy" src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" class="rounded-circle" width="40" height="40" alt="Profile image"></td>
                   <td><?= htmlspecialchars($user['username']) ?></td>
@@ -162,7 +171,9 @@ $pending_stmt->close();
                 </tr>
               <?php endwhile; ?>
             </tbody>
-          </table></div>
+          </table>
+</div>
+        <?= paginationLinks($search_results->num_rows > 50, 'search_page') ?>
         <?php else: ?>
           <div class="p-3 text-muted">No users found for "<?= htmlspecialchars($search_query) ?>"</div>
         <?php endif; ?>

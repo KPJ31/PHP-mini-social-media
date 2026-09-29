@@ -1,11 +1,16 @@
 <?php
 require_once 'config.php';
 require_once 'session.php';
+require_once 'function.php';
 requirePost();
 
 if (isset($_POST['delete_account']) && isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];
 
+    $files = $conn->prepare('SELECT profile_image AS image FROM users WHERE id = ? UNION SELECT image FROM posts WHERE user_id = ?');
+    $files->bind_param('ii', $user_id, $user_id);
+    $files->execute();
+    $uploads = $files->get_result()->fetch_all(MYSQLI_ASSOC);
     $conn->begin_transaction();
     try {
     $cleanup = $conn->prepare('DELETE FROM likes WHERE user_id = ? OR post_id IN (SELECT id FROM posts WHERE user_id = ?)');
@@ -22,8 +27,8 @@ if (isset($_POST['delete_account']) && isset($_SESSION['user_id'])) {
         $conn->rollback();
         throw $e;
     }
-    $_SESSION = [];
-    session_destroy();
+    foreach ($uploads as $upload) { removeUnusedUpload($upload['image']); }
+    clearLoginSession();
     header("Location: index.php");
     exit;
 } else {

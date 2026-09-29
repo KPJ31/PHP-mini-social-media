@@ -1,7 +1,6 @@
 <?php
 require_once 'security.php';
 requirePost();
-$_SESSION = [];
-session_destroy();
+clearLoginSession();
 header('Location: login.php');
 exit;

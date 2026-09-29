@@ -31,7 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $stmt = $conn->prepare("INSERT INTO posts (user_id, content, image, created_at) VALUES (?, ?, ?, NOW())");
         $stmt->bind_param("iss", $user_id, $content, $image);
-        if ($stmt->execute()) {
+        try {
+            $saved = $stmt->execute();
+        } catch (Throwable $e) {
+            removeUnusedUpload($image);
+            throw $e;
+        }
+        if ($saved) {
             $success = "Post created successfully!";
             header("Location: index.php");
             exit();

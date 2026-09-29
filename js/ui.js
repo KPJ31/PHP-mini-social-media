@@ -59,13 +59,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+    document.addEventListener('submit', event => {
+        const message = event.target.dataset.confirm;
+        if (message && !window.confirm(message)) event.preventDefault();
+    }, true);
+    window.addEventListener('pageshow', () => {
+        document.querySelectorAll('[data-original-label]').forEach(button => {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalLabel;
+        });
+    });
     document.querySelectorAll('form[data-loading-form]').forEach(form => {
         form.addEventListener('submit', event => {
             if (event.defaultPrevented) return;
             const button = form.querySelector('button[type="submit"]');
             if (!button) return;
+            button.dataset.originalLabel = button.innerHTML;
             button.disabled = true;
-            button.textContent = 'Please wait?';
+            button.textContent = 'Please wait...';
         });
     });
 });

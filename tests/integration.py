@@ -23,18 +23,24 @@ def wait_port(value, process):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mysql-bin', required=True)
+    parser.add_argument('--ui', action='store_true')
     args = parser.parse_args()
     mysql_bin = Path(args.mysql_bin)
     suffix = '.exe' if os.name == 'nt' else ''
     flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
     processes = []
     checks = 0
+    artifacts = ROOT / 'tests' / 'artifacts' / 'audit'
+    artifacts.mkdir(parents=True, exist_ok=True)
+    passed = []
     with tempfile.TemporaryDirectory(prefix='minisocial-qa-') as directory:
         temp = Path(directory)
         app = temp / 'app'
         app.mkdir()
         for file in ROOT.glob('*.php'): shutil.copy2(file, app / file.name)
-        for folder in ['js', 'css', 'uploads']: shutil.copytree(ROOT / folder, app / folder)
+        for folder in ['js', 'css']: shutil.copytree(ROOT / folder, app / folder)
+        (app / 'uploads').mkdir()
+        shutil.copy2(ROOT / 'uploads' / 'default.svg', app / 'uploads' / 'default.svg')
         shutil.copy2(ROOT / 'likePost.js', app / 'likePost.js')
         data = temp / 'mysql-data'
         db_port, http_port = port(), port()
@@ -51,6 +57,7 @@ def main():
             nonlocal checks
             assert condition, label
             checks += 1
+            passed.append(label)
             print('PASS: '+label, flush=True)
         try:
             init = subprocess.run([str(mysql_bin / ('mysqld'+suffix)), '--no-defaults',
@@ -178,6 +185,17 @@ def main():
                 html = bob.request(path)[1]
                 forms = re.findall(r'<form\b[^>]*method="post"[^>]*>(.*?)</form>', html, re.I | re.S)
                 check(bool(forms) and all('name="csrf_token"' in form for form in forms),'POST forms include CSRF: '+path)
+            from audit_cases import run, throttle
+            run(Client, sql, check, app, artifacts)
+            if args.ui:
+                import sys
+                browser_result = subprocess.run([sys.executable, str(ROOT / 'tests' / 'ui_browser.py'), base], capture_output=True, text=True, encoding='utf-8', creationflags=flags)
+                print(browser_result.stdout, flush=True)
+                if browser_result.returncode:
+                    print(browser_result.stderr, flush=True)
+                    raise AssertionError('Browser checks failed')
+            throttle(Client, check)
+            (artifacts / 'integration-results.json').write_text(json.dumps({'passed': checks, 'checks': passed}, indent=2), encoding='utf-8')
             print(str(checks)+' integration checks passed.', flush=True)
         except Exception:
             log.flush()

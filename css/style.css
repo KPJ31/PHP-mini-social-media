@@ -134,3 +134,15 @@ label,.form-label { display:block; font-size:12px; font-weight:600; margin-botto
  #chat-box { height:380px!important; }.message-bubble { max-width:90%; }.btn { min-height:42px; }.sidebar-note .btn { min-height:44px; }
 }
 @media(prefers-reduced-motion:reduce) { *,*:before,*:after { scroll-behavior:auto!important; transition:none!important; animation:none!important; }.btn:hover,.btn:active { transform:none; } }
+
+.pagination-links { display:flex; justify-content:flex-end; gap:12px; padding:16px 0; }
+.message-delete { border:0; padding:3px 0; background:transparent; color:inherit; text-decoration:underline; font-size:11px; min-height:28px; }
+.message-bubble.own .text-muted { color:var(--a-brand-100)!important; }
+.chat-status:not(:empty) { padding-top:12px; }
+@media(max-width:899px) {
+ .auth-shell { grid-template-columns:1fr; max-width:500px; }
+ .auth-visual { padding:24px 28px; }
+ .auth-visual h2 { font-size:25px; margin:22px 0 8px; }
+ .auth-visual p { margin:0; max-width:none; }
+ .auth-art,.auth-tagline { display:none; }
+}
