@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once 'workspace.php';
 
 /**
  * Sanitize user input to prevent XSS and other attacks
@@ -29,7 +29,7 @@ function areFriends($user1_id, $user2_id) {
         SELECT 1 FROM friend_requests
         WHERE ((sender_id = ? AND receiver_id = ?)
            OR (sender_id = ? AND receiver_id = ?))
-        AND status = 'accepted' LIMIT 1
+        AND status = 'accepted' AND EXISTS (SELECT 1 FROM users WHERE id = friend_requests.sender_id AND is_admin=0 AND staff_role='member' AND is_suspended=0) AND EXISTS (SELECT 1 FROM users WHERE id = friend_requests.receiver_id AND is_admin=0 AND staff_role='member' AND is_suspended=0) LIMIT 1
     ");
     $stmt->bind_param("iiii", $user1_id, $user2_id, $user2_id, $user1_id);
     $stmt->execute();

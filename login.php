@@ -18,13 +18,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($email === '' || $password === '') {
         $errors[] = "Email and password are required.";
     } else {
-        $stmt = $conn->prepare("SELECT id, username, password, is_admin, is_suspended, auth_version FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id, username, password, is_admin, is_suspended, auth_version, staff_role FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $stmt->store_result();
 
         if ($stmt->num_rows === 1) {
-            $stmt->bind_result($user_id, $username, $hashed_password, $is_admin, $is_suspended, $auth_version);
+            $stmt->bind_result($user_id, $username, $hashed_password, $is_admin, $is_suspended, $auth_version, $staff_role);
             $stmt->fetch();
 
             if (!$is_suspended && password_verify($password, $hashed_password)) {
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['username'] = $username;
                 $_SESSION['is_admin'] = (bool) $is_admin;
                 $_SESSION['auth_version'] = (int) $auth_version;
-                header('Location: ' . ($is_admin ? 'admin.php' : 'index.php'));
+                header('Location: ' . (($is_admin || in_array($staff_role,['manager','employee'],true)) ? 'admin.php' : 'index.php'));
                 exit();
             } else {
                 $errors[] = "Invalid email or password.";

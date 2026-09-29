@@ -7,10 +7,10 @@ $postId = inputId($_POST, 'post_id');
 $userId = (int) $_SESSION['user_id'];
 $conn->begin_transaction();
 try {
-    $post = $conn->prepare('SELECT id FROM posts WHERE id = ? FOR UPDATE');
+    $post = $conn->prepare('SELECT id,user_id FROM posts WHERE id = ? FOR UPDATE');
     $post->bind_param('i', $postId);
     $post->execute();
-    if (!$post->get_result()->fetch_assoc()) {
+    if (!($likedPost = $post->get_result()->fetch_assoc())) {
         $conn->rollback();
         failRequest(404, 'Post not found.');
     }
@@ -21,6 +21,7 @@ try {
         $insert = $conn->prepare('INSERT INTO likes (user_id, post_id) VALUES (?, ?)');
         $insert->bind_param('ii', $userId, $postId);
         $insert->execute();
+        if ((int)$likedPost['user_id']!==$userId) { notifyUser((int)$likedPost['user_id'],$userId,'like',$_SESSION['username'].' liked your post.',$postId,'like:'.$userId.':'.$postId); }
     }
     $count = $conn->prepare('SELECT COUNT(*) AS total FROM likes WHERE post_id = ?');
     $count->bind_param('i', $postId);

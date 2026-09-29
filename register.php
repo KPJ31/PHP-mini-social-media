@@ -44,9 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insert = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
             $insert->bind_param("sss", $username, $email, $hashed_password);
 
+            $conn->begin_transaction();
             try {
                 $registered = $insert->execute();
+                $registeredId=$insert->insert_id;
+                notifyUser($registeredId,$registeredId,'account','Welcome to MiniSocial. Your notifications will appear here.');
+                notifyStaff('users.view','A new member joined the community.',$registeredId,'registered:'.$registeredId,$registeredId);
+                $conn->commit();
             } catch (mysqli_sql_exception $e) {
+                $conn->rollback();
                 if ($e->getCode() !== 1062) { throw $e; }
                 $registered = false;
             }

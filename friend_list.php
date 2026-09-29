@@ -18,7 +18,7 @@ $friends_stmt = $conn->prepare("
         (fr.sender_id = ? AND fr.receiver_id = u.id) OR 
         (fr.receiver_id = ? AND fr.sender_id = u.id)
     )
-    WHERE fr.status = 'accepted' ORDER BY u.username, u.id LIMIT 51 OFFSET ?
+    WHERE fr.status = 'accepted' AND u.is_admin=0 AND u.staff_role='member' ORDER BY u.username, u.id LIMIT 51 OFFSET ?
 ");
 $friends_stmt->bind_param("iii", $user_id, $user_id, $friendOffset);
 $friends_stmt->execute();
@@ -29,7 +29,7 @@ $friends_stmt->close();
 $search_results = null;
 if ($search_query !== '') {
     $search_term = '%' . $search_query . '%';
-    $stmt = $conn->prepare("SELECT id, username, profile_image FROM users WHERE username LIKE ? AND id != ? ORDER BY username, id LIMIT 51 OFFSET ?");
+    $stmt = $conn->prepare("SELECT id, username, profile_image FROM users WHERE username LIKE ? AND id != ? AND is_admin=0 AND staff_role='member' AND is_suspended=0 ORDER BY username, id LIMIT 51 OFFSET ?");
     $stmt->bind_param("sii", $search_term, $user_id, $searchOffset);
     $stmt->execute();
     $search_results = $stmt->get_result();
@@ -41,7 +41,7 @@ $pending_stmt = $conn->prepare("
     SELECT DISTINCT u.id, u.username, u.profile_image
     FROM users u
     JOIN friend_requests fr ON u.id = fr.sender_id
-    WHERE fr.receiver_id = ? AND fr.status = 'pending' ORDER BY u.id LIMIT 51 OFFSET ?
+    WHERE fr.receiver_id = ? AND fr.status = 'pending' AND u.is_admin=0 AND u.staff_role='member' ORDER BY u.id LIMIT 51 OFFSET ?
 ");
 $pending_stmt->bind_param("ii", $user_id, $requestOffset);
 $pending_stmt->execute();

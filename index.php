@@ -6,7 +6,7 @@ require_once 'function.php';
 $feed = inputText($_GET, 'feed') === 'friends' ? 'friends' : 'all';
 $viewer = (int) $_SESSION['user_id'];
 $feedFilter = $feed === 'friends' ? "WHERE posts.user_id = $viewer OR EXISTS (SELECT 1 FROM friend_requests f WHERE f.status = 'accepted' AND ((f.sender_id = $viewer AND f.receiver_id = posts.user_id) OR (f.receiver_id = $viewer AND f.sender_id = posts.user_id)))" : '';
-$members = $conn->query('SELECT id, username, profile_image FROM users WHERE is_suspended = 0 ORDER BY id DESC LIMIT 6');
+$members = $conn->query("SELECT id, username, profile_image FROM users WHERE is_suspended = 0 AND is_admin=0 AND staff_role='member' ORDER BY id DESC LIMIT 6");
 $offset = (pageNumber() - 1) * 20;
 $shown = 0;
 // Fetch a bounded page of posts

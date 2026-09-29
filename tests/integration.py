@@ -194,6 +194,8 @@ def main():
             check('Password unchanged' in again.stdout, 'admin setup is idempotent')
             from admin_cases import run as run_admin
             run_admin(Client, sql, check, admin_password)
+            from workspace_cases import run as run_workspace
+            run_workspace(Client, sql, check, admin_password)
             if args.ui:
                 import sys
                 browser_result = subprocess.run([sys.executable, str(ROOT / 'tests' / 'ui_browser.py'), base, admin_password], capture_output=True, text=True, encoding='utf-8', creationflags=flags)
@@ -202,6 +204,7 @@ def main():
                     (artifacts / 'browser-failure.txt').write_text(browser_result.stderr, encoding='utf-8')
                     print(browser_result.stderr, flush=True)
                     raise AssertionError('Browser checks failed')
+                (artifacts / 'browser-failure.txt').unlink(missing_ok=True)
             throttle(Client, check)
             (artifacts / 'integration-results.json').write_text(json.dumps({'passed': checks, 'checks': passed}, indent=2), encoding='utf-8')
             print(str(checks)+' integration checks passed.', flush=True)

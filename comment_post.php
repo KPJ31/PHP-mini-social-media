@@ -25,9 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
     $comment = trim(inputText($_POST, 'comment'));
     if ($comment === '' || strlen($comment) > 65535) { failRequest(422, 'Enter a comment within 65535 bytes.'); }
     if ($comment !== '') {
+        $conn->begin_transaction();
+        try {
         $stmt = $conn->prepare("INSERT INTO comments (user_id, post_id, comment, created_at) VALUES (?, ?, ?, NOW())");
         $stmt->bind_param("iis", $user_id, $post_id, $comment);
         $stmt->execute();
+        $commentId=$stmt->insert_id;
+        if ((int)$post['user_id']!==(int)$user_id) { notifyUser((int)$post['user_id'],(int)$user_id,'comment',$_SESSION['username'].' commented on your post.',$post_id,'comment:'.$commentId); }
+        notifyStaff('comments.view','A new comment is ready to review.',$commentId,'new_comment:'.$commentId,(int)$user_id);
+        $conn->commit();
+        } catch (Throwable $e) { $conn->rollback(); throw $e; }
     }
     if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest') { echo 'success'; exit; }
     header("Location: comment_post.php?post_id=" . $post_id);

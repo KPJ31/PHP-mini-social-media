@@ -4,3 +4,4 @@
 <link rel="stylesheet" href="css/style.css?v=<?= filemtime(__DIR__ . '/css/style.css') ?>">
 <link rel="stylesheet" href="css/social.css?v=<?= filemtime(__DIR__ . '/css/social.css') ?>">
 <script src="js/ui.js?v=<?= filemtime(__DIR__ . '/js/ui.js') ?>" defer></script>
+<script src="js/notifications.js?v=<?= filemtime(__DIR__ . '/js/notifications.js') ?>" defer></script>

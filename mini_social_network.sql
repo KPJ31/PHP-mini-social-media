@@ -7,6 +7,8 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    staff_role VARCHAR(16) NOT NULL DEFAULT 'member',
+    staff_permissions TEXT NULL,
     is_admin TINYINT(1) NOT NULL DEFAULT 0,
     is_suspended TINYINT(1) NOT NULL DEFAULT 0,
     auth_version INT NOT NULL DEFAULT 0,
@@ -92,3 +94,20 @@ ADD COLUMN deleted_by_receiver TINYINT(1) DEFAULT 0;
 ALTER TABLE messages ADD created_at DATETIME DEFAULT CURRENT_TIMESTAMP;
 
 CREATE TABLE IF NOT EXISTS admin_audit (id INT AUTO_INCREMENT PRIMARY KEY, admin_id INT NOT NULL, action VARCHAR(50) NOT NULL, target_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+
+CREATE TABLE IF NOT EXISTS notifications (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,
+ user_id INT NOT NULL,
+ actor_id INT NULL,
+ kind VARCHAR(40) NOT NULL,
+ title VARCHAR(255) NOT NULL,
+ target_id INT NOT NULL DEFAULT 0,
+ permission_key VARCHAR(40) NOT NULL DEFAULT '',
+ event_key VARCHAR(120) NOT NULL,
+ is_read TINYINT(1) NOT NULL DEFAULT 0,
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ UNIQUE KEY notification_event (user_id,event_key),
+ INDEX notification_inbox (user_id,is_read,id),
+ FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+ FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

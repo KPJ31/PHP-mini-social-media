@@ -12,7 +12,7 @@ if (!$receiver_id || $sender_id == $receiver_id) {
 // Lock the user pair in a consistent order so reciprocal requests cannot duplicate.
 $conn->begin_transaction();
 try {
-    $users = $conn->prepare('SELECT id FROM users WHERE id IN (?, ?) ORDER BY id FOR UPDATE');
+    $users = $conn->prepare("SELECT id FROM users WHERE id IN (?, ?) AND is_admin=0 AND staff_role='member' AND is_suspended=0 ORDER BY id FOR UPDATE");
     $users->bind_param('ii', $sender_id, $receiver_id);
     $users->execute();
     if ($users->get_result()->num_rows !== 2) {
@@ -26,6 +26,7 @@ try {
         $stmt = $conn->prepare("INSERT INTO friend_requests (sender_id, receiver_id, status) VALUES (?, ?, 'pending')");
         $stmt->bind_param('ii', $sender_id, $receiver_id);
         $stmt->execute();
+        notifyUser((int)$receiver_id,(int)$sender_id,'friend_request',$_SESSION['username'].' sent you a friend request.',(int)$sender_id,'friend_request:'.$stmt->insert_id);
     }
     $conn->commit();
 } catch (Throwable $e) {

@@ -31,9 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         $stmt = $conn->prepare("INSERT INTO posts (user_id, content, image, created_at) VALUES (?, ?, ?, NOW())");
         $stmt->bind_param("iss", $user_id, $content, $image);
+        $conn->begin_transaction();
         try {
             $saved = $stmt->execute();
+            $newPost=$stmt->insert_id;
+            $friends=dbRun("SELECT DISTINCT u.id FROM users u JOIN friend_requests f ON ((f.sender_id=? AND f.receiver_id=u.id) OR (f.receiver_id=? AND f.sender_id=u.id)) WHERE f.status='accepted' AND u.is_admin=0 AND u.staff_role='member' AND u.is_suspended=0",'ii',[(int)$user_id,(int)$user_id])->get_result();
+            while ($friend=$friends->fetch_assoc()) { notifyUser((int)$friend['id'],(int)$user_id,'friend_post',$_SESSION['username'].' shared a new post.',$newPost,'post:'.$newPost); }
+            notifyStaff('posts.view','A new community post is ready to review.',$newPost,'new_post:'.$newPost,(int)$user_id);
+            $conn->commit();
         } catch (Throwable $e) {
+            $conn->rollback();
             removeUnusedUpload($image);
             throw $e;
         }

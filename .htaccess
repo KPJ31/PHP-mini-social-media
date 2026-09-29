@@ -5,6 +5,6 @@ RewriteRule (^|/)\. - [F,L]
 <FilesMatch "(?i)\.(sql|md|py|log|bak|ini|env|lock)$">
     Require all denied
 </FilesMatch>
-<FilesMatch "^(config|security|session|function|navbar|footer|ui_assets|message_list|auth_throttle)\.php$">
+<FilesMatch "^(config|security|session|function|navbar|footer|ui_assets|message_list|auth_throttle|workspace)\.php$">
     Require all denied
 </FilesMatch>

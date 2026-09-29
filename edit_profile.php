@@ -43,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
             $update = $conn->prepare('UPDATE users SET username = ?, email = ?, bio = ?, profile_image = ? WHERE id = ?');
             $update->bind_param('ssssi', $username, $email, $bio, $new_image, $user_id);
             $update->execute();
+            notifyUser((int)$user_id,(int)$user_id,'account','Your profile details were updated.');
             if ($new_image !== $old_image) { removeUnusedUpload($old_image); }
             $_SESSION['username'] = $username;
             $success = 'Profile updated successfully.';

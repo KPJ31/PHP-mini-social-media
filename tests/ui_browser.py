@@ -105,19 +105,30 @@ with sync_playwright() as p:
         page.wait_for_url('**/admin.php')
         for width in [320,390,768,1440,1920]:
             page.set_viewport_size({'width':width,'height':1000})
-            for tab in ['overview','users','posts','comments','messages','audit']:
+            for tab in ['overview','users','posts','comments','messages','audit','team','account']:
                 visit('admin.php?tab='+tab)
                 layout('admin '+tab+' '+str(width))
                 if width in [390,1440]: accessibility_check('admin '+tab+' '+str(width))
                 if tab in ['overview','users'] and width in [390,1440]:
                     page.screenshot(path=str(artifacts/('admin-'+tab+'-'+str(width)+'.png')),full_page=True)
-        visit('admin.php?tab=users&q=mini_admin')
-        page.get_by_text('Edit account',exact=True).click()
-        check(page.locator('input[name=username]').is_visible(),'admin edit account expands')
+        visit('admin.php?tab=account')
+        check(page.locator('input[name=username]').is_visible(),'management account settings available')
         page.locator('textarea[name=bio]').fill('Community administrator')
         page.get_by_role('button',name='Save account',exact=True).click()
         page.wait_for_load_state('networkidle')
         check('Changes saved successfully' in page.locator('body').inner_text(),'admin account form saves')
+    for width in [320,390,768,1440]:
+        page.set_viewport_size({'width':width,'height':1000})
+        visit('notifications.php'); layout('notifications '+str(width))
+        if width in [390,1440]:
+            accessibility_check('notifications '+str(width))
+            page.screenshot(path=str(artifacts/('notifications-'+str(width)+'.png')),full_page=True)
+    check(page.locator('.notification-bell').is_visible(),'notification bell is visible')
+    visit('admin.php?tab=team')
+    page.get_by_text('Create team account',exact=True).click()
+    check(page.locator('#new-name').is_visible(),'staff creation form expands')
+    accessibility_check('expanded team form')
+    layout('expanded team form')
     (artifacts/'accessibility.json').write_text(json.dumps(accessibility,indent=2),encoding='utf-8')
     (artifacts/'browser-results.json').write_text(json.dumps({'passed':checks,'javascript_errors':errors,'axe_pages':len(accessibility),'axe_violations':sum(len(x['violations']) for x in accessibility)},indent=2))
     check(not any(x['violations'] for x in accessibility), 'automated WCAG A/AA accessibility checks')
