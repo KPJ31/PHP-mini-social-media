@@ -3,6 +3,7 @@ require_once 'config.php';
 require_once 'session.php';
 require_once 'function.php';
 requirePost();
+if (!empty($_SESSION['is_admin'])) { failRequest(403, 'The administrator account cannot be deleted.'); }
 
 if (isset($_POST['delete_account']) && isset($_SESSION['user_id'])) {
     $user_id = $_SESSION['user_id'];

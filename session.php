@@ -2,15 +2,17 @@
 require_once __DIR__ . '/config.php';
 $authenticated = isset($_SESSION['user_id']);
 if ($authenticated) {
-    $sessionUser = $conn->prepare('SELECT username FROM users WHERE id = ?');
+    $sessionUser = $conn->prepare('SELECT username, is_admin, is_suspended, auth_version FROM users WHERE id = ?');
     $sessionUser->bind_param('i', $_SESSION['user_id']);
     $sessionUser->execute();
     $currentUser = $sessionUser->get_result()->fetch_assoc();
-    if (!$currentUser) {
+    if (!$currentUser || $currentUser['is_suspended'] || (!isset($_SESSION['auth_version']) || (int) $_SESSION['auth_version'] !== (int) $currentUser['auth_version'])) {
         clearLoginSession();
         $authenticated = false;
     } else {
         $_SESSION['username'] = $currentUser['username'];
+        $_SESSION['auth_version'] = (int) $currentUser['auth_version'];
+        $_SESSION['is_admin'] = (bool) $currentUser['is_admin'];
     }
 }
 if (!$authenticated) {

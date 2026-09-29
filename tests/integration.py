@@ -37,7 +37,8 @@ def main():
         temp = Path(directory)
         app = temp / 'app'
         app.mkdir()
-        for file in ROOT.glob('*.php'): shutil.copy2(file, app / file.name)
+        for pattern in ['*.php', '*.js']:
+            for file in ROOT.glob(pattern): shutil.copy2(file, app / file.name)
         for folder in ['js', 'css']: shutil.copytree(ROOT / folder, app / folder)
         (app / 'uploads').mkdir()
         shutil.copy2(ROOT / 'uploads' / 'default.svg', app / 'uploads' / 'default.svg')
@@ -187,11 +188,18 @@ def main():
                 check(bool(forms) and all('name="csrf_token"' in form for form in forms),'POST forms include CSRF: '+path)
             from audit_cases import run, throttle
             run(Client, sql, check, app, artifacts)
+            setup = subprocess.run(['php', str(app/'setup_admin.php')], env=env, capture_output=True, text=True, creationflags=flags, check=True)
+            admin_password = re.search(r'Password: (.+)', setup.stdout).group(1).strip()
+            again = subprocess.run(['php', str(app/'setup_admin.php')], env=env, capture_output=True, text=True, creationflags=flags, check=True)
+            check('Password unchanged' in again.stdout, 'admin setup is idempotent')
+            from admin_cases import run as run_admin
+            run_admin(Client, sql, check, admin_password)
             if args.ui:
                 import sys
-                browser_result = subprocess.run([sys.executable, str(ROOT / 'tests' / 'ui_browser.py'), base], capture_output=True, text=True, encoding='utf-8', creationflags=flags)
+                browser_result = subprocess.run([sys.executable, str(ROOT / 'tests' / 'ui_browser.py'), base, admin_password], capture_output=True, text=True, encoding='utf-8', creationflags=flags)
                 print(browser_result.stdout, flush=True)
                 if browser_result.returncode:
+                    (artifacts / 'browser-failure.txt').write_text(browser_result.stderr, encoding='utf-8')
                     print(browser_result.stderr, flush=True)
                     raise AssertionError('Browser checks failed')
             throttle(Client, check)

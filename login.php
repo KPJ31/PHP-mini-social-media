@@ -18,21 +18,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($email === '' || $password === '') {
         $errors[] = "Email and password are required.";
     } else {
-        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id, username, password, is_admin, is_suspended, auth_version FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $stmt->store_result();
 
         if ($stmt->num_rows === 1) {
-            $stmt->bind_result($user_id, $username, $hashed_password);
+            $stmt->bind_result($user_id, $username, $hashed_password, $is_admin, $is_suspended, $auth_version);
             $stmt->fetch();
 
-            if (password_verify($password, $hashed_password)) {
+            if (!$is_suspended && password_verify($password, $hashed_password)) {
                 // Set session
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $user_id;
                 $_SESSION['username'] = $username;
-                header("Location: index.php");
+                $_SESSION['is_admin'] = (bool) $is_admin;
+                $_SESSION['auth_version'] = (int) $auth_version;
+                header('Location: ' . ($is_admin ? 'admin.php' : 'index.php'));
                 exit();
             } else {
                 $errors[] = "Invalid email or password.";

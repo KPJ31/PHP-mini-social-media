@@ -1,7 +1,8 @@
 <?php
 $currentPage = basename($_SERVER['SCRIPT_NAME'] ?? 'index.php');
 $pageInfo = [
-    'index.php' => ['Your community', 'A little closer, every day.', 'Catch up with the people and moments that matter.'],
+    'admin.php' => ['Administration', 'Community dashboard', 'Manage your members and keep your community welcoming.'],
+    'index.php' => ['Your community', 'Your daily catch-up', 'Fresh moments and conversations from your community.'],
     'profile.php' => ['Profile', 'Your corner of the community.', 'Posts, personality, and the things you choose to share.'],
     'friend_list.php' => ['Connections', 'Good things start with people.', 'Find friends, welcome new connections, and keep in touch.'],
     'chat.php' => ['Messages', 'Keep the conversation going.', 'A space for one-to-one conversations with your friends.'],
@@ -11,11 +12,12 @@ $pageInfo = [
 ];
 [$pageLabel, $pageTitle, $pageDescription] = $pageInfo[$currentPage] ?? $pageInfo['index.php'];
 $navigation = [
-    ['index.php', 'bx-grid-alt', 'Community'],
+    ['index.php', 'bx-home-alt', 'Home feed'],
     ['friend_list.php', 'bx-group', 'Friends'],
     ['chat.php', 'bx-message-rounded-dots', 'Messages'],
     ['profile.php', 'bx-user-circle', 'My profile'],
 ];
+if (!empty($_SESSION['is_admin'])) { $navigation[] = ['admin.php', 'bx-shield-quarter', 'Admin dashboard']; }
 ?>
 <a href="#main-content" class="skip-link">Skip to content</a>
 <aside class="app-sidebar" id="site-navigation" aria-label="Main navigation">
@@ -46,7 +48,7 @@ $navigation = [
 <button class="nav-backdrop" data-close-menu tabindex="-1" aria-label="Close navigation" hidden></button>
 <header class="app-topbar">
     <div class="topbar-start"><button type="button" class="icon-button menu-toggle" aria-controls="site-navigation" aria-expanded="false" aria-label="Open navigation"><i class="bx bx-menu" aria-hidden="true"></i></button><a href="index.php" class="topbar-home">MiniSocial</a><span class="topbar-divider">/</span><span><?= $pageLabel ?></span></div>
-    <a class="topbar-profile" href="profile.php"><span class="avatar-initial small-avatar" aria-hidden="true"><?= htmlspecialchars(mb_strtoupper(mb_substr($_SESSION['username'] ?? 'M', 0, 1))) ?></span><span><?= htmlspecialchars($_SESSION['username'] ?? 'My profile') ?></span></a>
+    <a class="topbar-profile" href="profile.php" aria-label="My profile"><span class="avatar-initial small-avatar" aria-hidden="true"><?= htmlspecialchars(mb_strtoupper(mb_substr($_SESSION['username'] ?? 'M', 0, 1))) ?></span><span><?= htmlspecialchars($_SESSION['username'] ?? 'My profile') ?></span></a>
 </header>
 <main class="app-main" id="main-content" tabindex="-1">
     <div class="page-heading">

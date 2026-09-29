@@ -2,7 +2,7 @@
 import base64, os, sys, tempfile
 from pathlib import Path
 sys.path.insert(0, str(Path(tempfile.gettempdir()) / 'minisocial-ui-tools'))
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 base = sys.argv[1]
 artifacts = Path(__file__).resolve().parent / 'artifacts' / 'ui'
@@ -76,7 +76,7 @@ with sync_playwright() as p:
     page.set_viewport_size({'width':1440,'height':1000})
     visit('index.php')
     page.locator('.like-button').first.click()
-    page.wait_for_function("document.querySelector('.like-button').textContent.includes('1 likes')")
+    expect(page.locator('.like-button').first).to_contain_text('1 likes')
     check(True,'like interaction after restyling')
     visit(comment_path)
     page.locator('#comment').fill('Glad to be part of this community.')
@@ -86,7 +86,7 @@ with sync_playwright() as p:
     visit('chat.php?user_id=3')
     page.locator('#message').fill('A quick hello from the refreshed MiniSocial.')
     page.get_by_role('button',name='Send',exact=True).click()
-    page.wait_for_function("document.getElementById('chat-box').textContent.includes('A quick hello')")
+    expect(page.locator('#chat-box')).to_contain_text('A quick hello')
     check(True,'chat sends and refreshes')
     check(not errors,'no browser JavaScript errors: '+str(errors))
     page.locator('button[aria-label="Delete message for you"]').last.focus()
@@ -96,6 +96,28 @@ with sync_playwright() as p:
     count = page.locator('.message-bubble').count()
     page.locator('button[aria-label="Delete message for you"]').last.click()
     check(page.locator('.message-bubble').count() == count, 'destructive action cancellation')
+    if len(sys.argv)>2:
+        context.clear_cookies()
+        visit('login.php')
+        page.locator('#email').fill('admin@mini.com')
+        page.locator('#password').fill(sys.argv[2])
+        page.get_by_role('button',name='Log in',exact=True).click()
+        page.wait_for_url('**/admin.php')
+        for width in [320,390,768,1440,1920]:
+            page.set_viewport_size({'width':width,'height':1000})
+            for tab in ['overview','users','posts','comments','messages','audit']:
+                visit('admin.php?tab='+tab)
+                layout('admin '+tab+' '+str(width))
+                if width in [390,1440]: accessibility_check('admin '+tab+' '+str(width))
+                if tab in ['overview','users'] and width in [390,1440]:
+                    page.screenshot(path=str(artifacts/('admin-'+tab+'-'+str(width)+'.png')),full_page=True)
+        visit('admin.php?tab=users&q=mini_admin')
+        page.get_by_text('Edit account',exact=True).click()
+        check(page.locator('input[name=username]').is_visible(),'admin edit account expands')
+        page.locator('textarea[name=bio]').fill('Community administrator')
+        page.get_by_role('button',name='Save account',exact=True).click()
+        page.wait_for_load_state('networkidle')
+        check('Changes saved successfully' in page.locator('body').inner_text(),'admin account form saves')
     (artifacts/'accessibility.json').write_text(json.dumps(accessibility,indent=2),encoding='utf-8')
     (artifacts/'browser-results.json').write_text(json.dumps({'passed':checks,'javascript_errors':errors,'axe_pages':len(accessibility),'axe_violations':sum(len(x['violations']) for x in accessibility)},indent=2))
     check(not any(x['violations'] for x in accessibility), 'automated WCAG A/AA accessibility checks')

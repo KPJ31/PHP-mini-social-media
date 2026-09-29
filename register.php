@@ -54,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $insert->insert_id;
                 $_SESSION['username'] = $username;
+                $_SESSION['is_admin'] = false;
+                $_SESSION['auth_version'] = 0;
                 header("Location: index.php");
                 exit();
             } else {
