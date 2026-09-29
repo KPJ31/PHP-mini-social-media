@@ -61,8 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
   <title>Edit Profile - Mini Social Network</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap 5.3 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<?php include 'ui_assets.php'; ?>
 </head>
 <body class="bg-light">
 
@@ -70,44 +69,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
 
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-lg-6 col-md-8 col-sm-10">
+    <div class="col-lg-8">
 
-      <div class="card shadow-sm p-4">
-        <h4 class="mb-4 text-center">Edit Profile</h4>
+      <div class="card form-panel">
+        <h2>Profile details</h2>
 
         <?php if ($success): ?>
-          <div class="alert alert-success"><?= $success ?></div>
+          <div class="alert alert-success" role="status"><?= $success ?></div>
         <?php elseif ($error): ?>
-          <div class="alert alert-danger"><?= $error ?></div>
+          <div class="alert alert-danger" role="alert"><?= $error ?></div>
         <?php endif; ?>
 
-        <form action="" method="POST" enctype="multipart/form-data"><?= csrfField() ?>
+        <form action="" method="POST" enctype="multipart/form-data" data-loading-form><?= csrfField() ?>
           <input type="hidden" name="update_profile" value="1">
 
           <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>" class="form-control" required>
+            <label class="form-label" for="username">Username</label>
+            <input type="text" name="username" id="username" value="<?= htmlspecialchars($user['username']) ?>" class="form-control" required>
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" class="form-control" required>
+            <label class="form-label" for="email">Email</label>
+            <input type="email" name="email" id="email" value="<?= htmlspecialchars($user['email']) ?>" class="form-control" required>
           </div>
 
           <div class="mb-3">
-            <label>Bio</label>
-            <textarea name="bio" class="form-control" rows="3"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
+            <label for="bio">Bio</label>
+            <textarea name="bio" id="bio" class="form-control" rows="3"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
           </div>
 
           <div class="mb-3">
-            <label class="form-label d-block">Profile Image</label>
-            <img src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" width="100" height="100" class="rounded-circle mb-2 border">
-            <input type="file" name="profile_image" class="form-control">
+            <label class="form-label d-block" for="profile_image">Profile Image</label>
+            <img loading="lazy" src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" width="100" height="100" class="rounded-circle mb-2 border" alt="Profile image">
+            <input type="file" name="profile_image" id="profile_image" class="form-control" accept="image/jpeg,image/png,image/gif" data-preview="avatar-preview" aria-describedby="avatar-help"><p id="avatar-help" class="form-text">JPG, PNG, or GIF. Up to 2 MB.</p><img id="avatar-preview" class="upload-preview" alt="Selected profile image preview" hidden>
           </div>
 
-          <div class="d-flex justify-content-between align-items-center mt-4">
+          <div class="form-actions">
             <div>
-              <button type="submit" class="btn btn-primary">Save Changes</button>
+              <button type="submit" class="btn btn-gold">Save Changes</button>
               <a href="profile.php" class="btn btn-secondary ms-2">Cancel</a>
             </div>
             
@@ -122,6 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
 
 <!-- Bootstrap JS Bundle -->
 
+<?php include 'footer.php'; ?>
 </body>
 </html>
 

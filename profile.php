@@ -35,8 +35,7 @@ $post_stmt->close();
   <meta name="csrf-token" content="<?= csrfToken() ?>">
   <meta charset="UTF-8">
   <title><?= htmlspecialchars($user['username']) ?> - Profile</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<?php include 'ui_assets.php'; ?>
 </head>
 <body class="bg-light">
 
@@ -45,37 +44,37 @@ $post_stmt->close();
 <div class="container mt-4">
   <div class="row">
     <div class="col-md-4 text-center">
-      <div class="card shadow p-4">
-        <img src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" class="rounded-circle mb-3" width="150" height="150" alt="Profile">
-        <h4><?= htmlspecialchars($user['username']) ?></h4>
+      <div class="card profile-card">
+        <img loading="lazy" src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" class="rounded-circle mb-3" width="150" height="150" alt="Profile" alt="Image shared with this post">
+        <h2><?= htmlspecialchars($user['username']) ?></h2>
         <p class="text-muted"><?= htmlspecialchars($user['email']) ?></p>
         <?php if (!empty($user['bio'])): ?>
           <p><?= nl2br(htmlspecialchars($user['bio'])) ?></p>
         <?php endif; ?>
         <?php if ($view_user_id == $logged_in_user): ?>
           <a href="edit_profile.php" class="btn btn-outline-primary mb-2">Edit Profile</a>
-          <a href="add_post.php" class="btn btn-primary mb-2">Create Post</a>
+          <a href="add_post.php" class="btn btn-gold mb-2">Create Post</a>
           <form action="delete_account.php" method="post" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');"><?= csrfField() ?>
-            <button type="submit" name="delete_account" class="btn btn-danger w-100">Delete Account</button>
+            <button type="submit" name="delete_account" class="btn btn-outline-danger w-100">Delete Account</button>
           </form>
         <?php endif; ?>
       </div>
     </div>
 
     <div class="col-md-8">
-      <h4 class="mb-3">Posts by <?= htmlspecialchars($user['username']) ?></h4>
+      <h2 class="mb-3">Posts by <?= htmlspecialchars($user['username']) ?></h2>
       <?php if ($posts->num_rows > 0): ?>
         <?php while ($post = $posts->fetch_assoc()): ?>
           <div class="card mb-3 shadow-sm">
             <div class="card-header d-flex align-items-center">
-              <img src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
+              <img loading="lazy" src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Image shared with this post">
               <strong><?= htmlspecialchars($post['username']) ?></strong>
               <span class="ms-auto text-muted small"><?= date('F j, Y h:i A', strtotime($post['created_at'])) ?></span>
             </div>
             <div class="card-body">
               <p><?= nl2br(htmlspecialchars($post['content'] ?? '')) ?></p>
               <?php if (!empty($post['image'])): ?>
-                <img src="uploads/<?= htmlspecialchars($post['image']) ?>" class="img-fluid rounded">
+                <img loading="lazy" src="uploads/<?= htmlspecialchars($post['image']) ?>" class="img-fluid rounded" alt="Image shared with this post">
               <?php endif; ?>
               <div class="mt-2 d-flex justify-content-between">
                 <a href="comment_post.php?post_id=<?= $post['id'] ?>" class="btn btn-sm btn-outline-secondary">Comment</a>
@@ -93,5 +92,6 @@ $post_stmt->close();
   </div>
 </div>
 
+<?php include 'footer.php'; ?>
 </body>
 </html>

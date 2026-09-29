@@ -51,8 +51,7 @@ $pending_stmt->close();
   <meta name="csrf-token" content="<?= csrfToken() ?>">
   <meta charset="UTF-8">
   <title>Friends - Mini Social Network</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<?php include 'ui_assets.php'; ?>
 </head>
 <body class="bg-light">
 
@@ -61,11 +60,11 @@ $pending_stmt->close();
 <div class="container mt-4">
 
   <!-- Header with Search -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>Friends & Requests</h4>
+  <div class="search-panel">
+    <h2>Find a familiar face</h2>
     <form method="get" class="d-flex" role="search">
-      <input type="text" name="search" class="form-control" placeholder="Search username..." value="<?= htmlspecialchars($search_query) ?>">
-      <button type="submit" class="btn btn-primary ms-2">Search</button>
+      <label for="friend-search" class="visually-hidden">Search by username</label><input id="friend-search" type="search" name="search" class="form-control" placeholder="Search username..." value="<?= htmlspecialchars($search_query) ?>">
+      <button type="submit" class="btn btn-gold ms-2">Search</button>
     </form>
   </div>
 
@@ -76,7 +75,7 @@ $pending_stmt->close();
     </div>
     <div class="card-body p-0">
       <?php if ($friends->num_rows > 0): ?>
-        <table class="table table-hover m-0">
+        <div class="table-responsive" role="region" aria-label="Community members" tabindex="0"><table class="table table-hover m-0">
           <thead>
             <tr>
               <th>Profile</th>
@@ -87,18 +86,18 @@ $pending_stmt->close();
           <tbody>
             <?php while ($friend = $friends->fetch_assoc()): ?>
               <tr>
-                <td><img src="uploads/<?= htmlspecialchars(($friend['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $friend['profile_image']) ?>" class="rounded-circle" width="40" height="40"></td>
+                <td><img loading="lazy" src="uploads/<?= htmlspecialchars(($friend['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $friend['profile_image']) ?>" class="rounded-circle" width="40" height="40" alt="Profile image"></td>
                 <td><?= htmlspecialchars($friend['username']) ?></td>
                 <td>
                   <a href="profile.php?user_id=<?= $friend['id'] ?>" class="btn btn-sm btn-outline-primary">View</a>
-                  <a href="chat.php?user_id=<?= $friend['id'] ?>" class="btn btn-sm btn-success">Chat</a>
+                  <a href="chat.php?user_id=<?= $friend['id'] ?>" class="btn btn-sm btn-primary">Chat</a>
                 </td>
               </tr>
             <?php endwhile; ?>
           </tbody>
-        </table>
+        </table></div>
       <?php else: ?>
-        <div class="p-3 text-muted">You have no friends yet.</div>
+        <div class="empty-state"><i class="bx bx-group" aria-hidden="true"></i><h2>Your circle starts here.</h2><p>Search for a username above to send your first friend request.</p></div>
       <?php endif; ?>
     </div>
   </div>
@@ -110,7 +109,7 @@ $pending_stmt->close();
     </div>
     <div class="card-body p-0">
       <?php if ($pending_requests->num_rows > 0): ?>
-        <table class="table table-hover m-0">
+        <div class="table-responsive" role="region" aria-label="Community members" tabindex="0"><table class="table table-hover m-0">
           <thead>
             <tr>
               <th>Profile</th>
@@ -121,17 +120,17 @@ $pending_stmt->close();
           <tbody>
             <?php while ($req = $pending_requests->fetch_assoc()): ?>
               <tr>
-                <td><img src="uploads/<?= htmlspecialchars(($req['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $req['profile_image']) ?>" class="rounded-circle" width="40" height="40"></td>
+                <td><img loading="lazy" src="uploads/<?= htmlspecialchars(($req['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $req['profile_image']) ?>" class="rounded-circle" width="40" height="40" alt="Profile image"></td>
                 <td><?= htmlspecialchars($req['username']) ?></td>
                 <td>
-                  <form action="accept_request.php" method="post" class="d-inline"><?= csrfField() ?><input type="hidden" name="user_id" value="<?= $req['id'] ?>"><button type="submit" class="btn btn-sm btn-success">Accept</button></form>
+                  <form action="accept_request.php" method="post" class="d-inline"><?= csrfField() ?><input type="hidden" name="user_id" value="<?= $req['id'] ?>"><button type="submit" class="btn btn-sm btn-primary">Accept</button></form>
                 </td>
               </tr>
             <?php endwhile; ?>
           </tbody>
-        </table>
+        </table></div>
       <?php else: ?>
-        <div class="p-3 text-muted">No pending friend requests.</div>
+        <div class="empty-state"><i class="bx bx-check-circle" aria-hidden="true"></i><p>You are all caught up. New friend requests will appear here.</p></div>
       <?php endif; ?>
     </div>
   </div>
@@ -144,7 +143,7 @@ $pending_stmt->close();
       </div>
       <div class="card-body p-0">
         <?php if ($search_results && $search_results->num_rows > 0): ?>
-          <table class="table table-hover m-0">
+          <div class="table-responsive" role="region" aria-label="Community members" tabindex="0"><table class="table table-hover m-0">
             <thead>
               <tr>
                 <th>Profile</th>
@@ -155,7 +154,7 @@ $pending_stmt->close();
             <tbody>
               <?php while ($user = $search_results->fetch_assoc()): ?>
                 <tr>
-                  <td><img src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" class="rounded-circle" width="40" height="40"></td>
+                  <td><img loading="lazy" src="uploads/<?= htmlspecialchars(($user['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $user['profile_image']) ?>" class="rounded-circle" width="40" height="40" alt="Profile image"></td>
                   <td><?= htmlspecialchars($user['username']) ?></td>
                   <td>
                     <form action="send_request.php" method="post" class="d-inline"><?= csrfField() ?><input type="hidden" name="user_id" value="<?= $user['id'] ?>"><button type="submit" class="btn btn-sm btn-outline-primary">Send Request</button></form>
@@ -163,7 +162,7 @@ $pending_stmt->close();
                 </tr>
               <?php endwhile; ?>
             </tbody>
-          </table>
+          </table></div>
         <?php else: ?>
           <div class="p-3 text-muted">No users found for "<?= htmlspecialchars($search_query) ?>"</div>
         <?php endif; ?>
@@ -172,5 +171,6 @@ $pending_stmt->close();
   <?php endif; ?>
 </div>
 
+<?php include 'footer.php'; ?>
 </body>
 </html>

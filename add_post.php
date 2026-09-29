@@ -50,8 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="csrf-token" content="<?= csrfToken() ?>">
   <meta charset="UTF-8">
   <title>Create Post - Mini Social Network</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<?php include 'ui_assets.php'; ?>
 </head>
 <body class="bg-light">
 
@@ -59,16 +58,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="container mt-4">
   <div class="row justify-content-center">
-    <div class="col-md-8 shadow p-4 bg-white rounded">
-      <h3 class="mb-4">Create a New Post</h3>
+    <div class="col-lg-8 content-card form-panel">
+      <h2 class="mb-4">Your next story</h2>
 
       <?php if (!empty($errors)): ?>
-        <div class="alert alert-danger"><?= implode("<br>", $errors); ?></div>
+        <div class="alert alert-danger" role="alert"><?= implode("<br>", $errors); ?></div>
       <?php elseif (!empty($success)): ?>
-        <div class="alert alert-success"><?= $success; ?></div>
+        <div class="alert alert-success" role="status"><?= $success; ?></div>
       <?php endif; ?>
 
-      <form action="" method="POST" enctype="multipart/form-data"><?= csrfField() ?>
+      <form action="" method="POST" enctype="multipart/form-data" data-loading-form><?= csrfField() ?>
         <div class="mb-3">
           <label for="content" class="form-label">What's on your mind?</label>
           <textarea name="content" id="content" class="form-control" rows="4" required></textarea>
@@ -76,15 +75,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="mb-3">
           <label for="image" class="form-label">Upload Image (optional)</label>
-          <input type="file" name="image" class="form-control" accept="image/*">
+          <input type="file" name="image" id="image" data-preview="post-preview" aria-describedby="image-help" class="form-control" accept="image/jpeg,image/png,image/gif"><p id="image-help" class="form-text">JPG, PNG, or GIF. Up to 2 MB.</p><img id="post-preview" class="upload-preview" alt="Selected post image preview" hidden>
         </div>
 
-        <button type="submit" class="btn btn-success">Post</button>
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
+        <div class="form-actions"><button type="submit" class="btn btn-gold">Publish post <i class="bx bx-right-arrow-alt" aria-hidden="true"></i></button>
+        <a href="index.php" class="btn btn-secondary">Cancel</a></div>
       </form>
     </div>
   </div>
 </div>
 
+<?php include 'footer.php'; ?>
 </body>
 </html>

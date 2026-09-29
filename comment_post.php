@@ -57,8 +57,7 @@ $comments_stmt->close();
   <meta name="csrf-token" content="<?= csrfToken() ?>">
   <meta charset="UTF-8">
   <title>Comments - Mini Social Network</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<?php include 'ui_assets.php'; ?>
 </head>
 <body class="bg-light">
 
@@ -71,35 +70,35 @@ $comments_stmt->close();
       <!-- Post Display -->
       <div class="card mb-4 shadow-sm">
         <div class="card-header d-flex align-items-center">
-          <img src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
+          <img loading="lazy" src="uploads/<?= htmlspecialchars(($post['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $post['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Profile image">
           <strong><?= htmlspecialchars($post['username']); ?></strong>
           <span class="ms-auto small text-muted"><?= date('F j, Y h:i A', strtotime($post['created_at'])); ?></span>
         </div>
         <div class="card-body">
           <p><?= nl2br(htmlspecialchars($post['content'] ?? '')); ?></p>
           <?php if ($post['image']): ?>
-            <img src="uploads/<?= htmlspecialchars($post['image']); ?>" class="img-fluid rounded">
+            <img loading="lazy" src="uploads/<?= htmlspecialchars($post['image']); ?>" class="img-fluid rounded" alt="Profile image">
           <?php endif; ?>
         </div>
       </div>
 
       <!-- Comment Form -->
-      <form action="" method="POST" class="mb-4"><?= csrfField() ?>
+      <form action="" method="POST" class="card form-panel mb-4" data-loading-form><?= csrfField() ?>
         <div class="mb-3">
           <label for="comment" class="form-label">Add a comment</label>
           <textarea name="comment" id="comment" class="form-control" rows="3" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Post Comment</button>
+        <button type="submit" class="btn btn-gold">Post Comment</button>
         <a href="index.php" class="btn btn-secondary">Back</a>
       </form>
 
       <!-- Comment List -->
-      <div class="card p-3">
+      <div class="card form-panel">
         <h5 class="mb-3">Comments</h5>
         <?php if ($comments->num_rows > 0): ?>
           <?php while ($comment = $comments->fetch_assoc()): ?>
             <div class="d-flex mb-3">
-              <img src="uploads/<?= htmlspecialchars(($comment['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $comment['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
+              <img loading="lazy" src="uploads/<?= htmlspecialchars(($comment['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $comment['profile_image']); ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Profile image">
               <div class="flex-grow-1">
                 <strong><?= htmlspecialchars($comment['username']); ?></strong><br>
                 <span><?= nl2br(htmlspecialchars($comment['comment'])); ?></span><br>
@@ -121,5 +120,6 @@ $comments_stmt->close();
   </div>
 </div>
 
+<?php include 'footer.php'; ?>
 </body>
 </html>

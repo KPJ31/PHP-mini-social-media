@@ -25,9 +25,9 @@ while ($row = $result->fetch_assoc()):
     $isOwnMessage = $row['sender_id'] == $sender_id;
     ?>
     <div class="d-flex mb-2 <?= $isOwnMessage ? 'justify-content-end' : 'justify-content-start' ?>">
-        <div class="bg-<?= $isOwnMessage ? 'primary' : 'secondary' ?> text-white p-2 rounded" style="max-width: 70%;">
+        <div class="message-bubble <?= $isOwnMessage ? 'own' : '' ?>">
             <small><?= htmlspecialchars($row['message']) ?></small><br>
-            <small class="text-light-50"><?= date('h:i A', strtotime($row['sent_at'])) ?></small>
+            <time><?= date('h:i A', strtotime($row['sent_at'])) ?></time>
         </div>
     </div>
 <?php endwhile;

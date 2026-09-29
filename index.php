@@ -22,27 +22,23 @@ $posts = $stmt->get_result();
   <meta name="csrf-token" content="<?= csrfToken() ?>">
   <meta charset="UTF-8">
   <title>Mini Social Network</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+<?php include 'ui_assets.php'; ?>
 </head>
 <body class="bg-light">
 
 <?php include 'navbar.php'; ?>
 
 <div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
+  <div class="feed-layout">
+    <section class="feed-content" aria-label="Community posts">
 
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mb-0">Recent Posts</h3>
-        <a href="add_post.php" class="btn btn-primary btn-sm">+ Create Post</a>
-      </div>
-
+      <div class="welcome-panel"><span class="eyebrow">A place to belong</span><h2>Your people. Your stories.<br>Your everyday moments.</h2><p>Share something small. Start a conversation. Stay connected.</p></div>
+      <div class="section-title"><h2>Recent posts</h2><span>From your community</span></div>
       <?php if ($posts->num_rows > 0): ?>
         <?php while ($row = $posts->fetch_assoc()): ?>
           <div class="card mb-4 shadow-sm">
             <div class="card-header d-flex align-items-center">
-              <img src="uploads/<?= htmlspecialchars(($row['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $row['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile">
+              <img loading="lazy" src="uploads/<?= htmlspecialchars(($row['profile_image'] ?? 'default.png') === 'default.png' ? 'default.svg' : $row['profile_image']) ?>" class="rounded-circle me-2" width="40" height="40" alt="Profile" alt="Image shared with this post">
               <strong><?= htmlspecialchars($row['username']) ?></strong>
               <span class="ms-auto text-muted small"><?= date('F j, Y h:i A', strtotime($row['created_at'])) ?></span>
             </div>
@@ -50,10 +46,10 @@ $posts = $stmt->get_result();
               <p><?= nl2br(htmlspecialchars($row['content'] ?? '')) ?></p>
 
               <?php if (!empty($row['image'])): ?>
-                <img src="uploads/<?= htmlspecialchars($row['image']) ?>" class="img-fluid rounded mb-2">
+                <img loading="lazy" src="uploads/<?= htmlspecialchars($row['image']) ?>" class="img-fluid rounded mb-2" alt="Image shared with this post">
               <?php endif; ?>
 
-              <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex justify-content-between align-items-center post-actions">
                 <button class="btn btn-outline-primary btn-sm like-button" data-post-id="<?= $row['id'] ?>">
                   <span id="like-count-<?= $row['id'] ?>"><?= $row['likes'] ?> likes</span>
                 </button>
@@ -63,14 +59,20 @@ $posts = $stmt->get_result();
           </div>
         <?php endwhile; ?>
       <?php else: ?>
-        <p class="text-muted text-center">No posts available.</p>
+        <div class="empty-state"><i class="bx bx-edit" aria-hidden="true"></i><h2>The first story could be yours.</h2><p>No posts yet. Share a moment with your community.</p><a class="btn btn-outline-primary" href="add_post.php">Write your first post</a></div>
       <?php endif; ?>
 
-    </div>
+    </section>
+    <aside class="feed-aside" aria-label="Explore your community">
+      <div class="card"><div class="card-body"><span class="icon-badge"><i class="bx bx-group" aria-hidden="true"></i></span><h2>Find your people</h2><p>A familiar face. A new connection. Your next conversation starts here.</p><a href="friend_list.php" class="btn btn-outline-primary">Explore friends <i class="bx bx-right-arrow-alt" aria-hidden="true"></i></a></div></div>
+      <div class="card"><div class="card-body"><span class="icon-badge"><i class="bx bx-message-rounded-dots" aria-hidden="true"></i></span><h2>Say a little hello</h2><p>Pick up where you left off, or simply ask how their day is going.</p><a href="chat.php" class="btn btn-outline-primary">Open messages</a></div></div>
+      <p class="community-note">Make this a welcoming space. Be thoughtful, be kind, and share what matters to you.</p>
+    </aside>
   </div>
 </div>
 
 <script src="likePost.js"></script>
 
+<?php include 'footer.php'; ?>
 </body>
 </html>
